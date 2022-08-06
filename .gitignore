@@ -1,3 +1,4 @@
 .vscode
 cancelacion.gastos/*.pdf
 enlinea/avisos/*.pdf
+includes/constants.php
