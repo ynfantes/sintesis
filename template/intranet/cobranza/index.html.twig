@@ -1,0 +1,463 @@
+{# indice #}
+{% extends 'layout/intra.html.twig'%}
+{# JAVASCRIPT #}
+{% block head %}
+{{parent()}}
+<script src="{{ constant('ROOT')}}js/comun.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ constant('ROOT') }}css/jquery-ui-1.8.16.custom.css">
+<script type="text/javascript" src="{{ constant('ROOT')}}js/jquery-validate/jquery.validate.js"></script>
+<script type="text/javascript" src="{{ constant('ROOT')}}js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="{{ constant('ROOT')}}js/jquery-validate/localization/messages_es.js"></script>
+<script type="text/javascript" src="{{constant('ROOT')}}js/jquery.ui.datepicker-es.js"></script>
+{% endblock %}
+{% block titulo 'Administradora de Condominio'%}
+{% block contenido %}
+<div style="margin-top: 0px;" class="page-intro">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-money pr-10"></i>Registrar Gestión de Cobranza</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section style="padding-bottom: 0" class="main-container">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<div class="main col-md-12">
+<!-- page-title start -->
+<!-- ================ -->
+<div class="separator-2"></div>
+<p class="lead">Bienvenido Sr(a). {{session.usuario.nombre}}</p>
+<!-- page-title end -->
+<!-- blogpost start -->
+<!-- blogpost end -->
+<!-- blogpost start -->
+<article class="clearfix blogpost object-non-visible animated object-visible fadeInUpSmall" data-animation-effect="fadeInUpSmall" data-effect-delay="200">
+    <div class="blogpost-body">
+        <div class="post-info">
+        <span class="day">{{ "now"|date("d") }}</span>
+        <span class="month">{{ "now"|date("F g:ia")|replace({'Junuary':'Enero','February':'Febrero','March':'Marzo','April':'Abril','May':'Mayo','June':'Junio','July':'Julio','August':'Agosto','September':'Sep.','October':'Octubre','November':'Nov.','Dicember':'Dic.'}) }}</span>
+        </div>
+        <div class="blogpost-content">
+        <form class="form-inline" role="form" method="post" action="{{constant('URL_INTRANET')}}/cobranza/consultar">
+            <div class="form-group">
+                <label class="sr-only" for="inmueble">Inmueble</label>
+                <select class="form-control" name="inmueble">
+                    <option value="">Seleccione un inmueble</option>
+                    {% for inmueble in inmuebles %}
+                    <option value="{{inmueble.id}}" {%if inmueble.id==cuentas.codinm%}selected{%endif%}>{{inmueble.nombre_inmueble}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="apto">Apartamento</label>
+                <!--input type="text" class="form-control" id="apto" name="apto" placeholder="Código Apartamento"-->
+                <select name="apto" class="form-control">
+                    <option value="">Seleccione unidad familiar</option>
+                    {% if propietarios %}
+                        {% for propietario in propietarios %}
+                            <option value="{{propietario.apto}}" {% if propietario.apto == cuentas.apto %} selected="selected" {% endif %}>
+                                {{propietario.apto}} {{propietario.nombre}} ({{propietario.recibos}})</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-default" name="consultar">Consultar</button>
+        </form>
+        </div>
+    </div>
+</article>
+<form id="registrar-pago" method="post" action="{{constant('URL_INTRANET')}}/caja/consultar">
+<input type="hidden" name="inmueble" value=""/>
+<input type="hidden" name="apto" value=""/>
+</form>
+{% if cuentas is defined %}          
+<form novalidate="novalidate" id="wizard-1">
+<div class="col-sm-12" id="bootstrap-wizard-1">
+<div class="form-bootstrapWizard">
+<ul class="nav nav-pills white bootstrapWizard form-wizard">
+<li data-target="#step1" class="active">
+<a data-toggle="tab" href="#tab1"> <i class="fa fa-check-circle pr-5"></i> Estado de Cuenta</a>
+</li>
+<li data-target="#step2">
+<a data-toggle="tab" href="#tab2"><i class="fa fa-users pr-5"></i> Gestión de Cobranza</a>
+</li>
+<li data-target="#step3">
+<a data-toggle="tab" href="#tab3"> <i class="fa fa-edit pr-5"></i>Resultado</a>
+</li>
+</ul>
+<div class="clearfix"></div>
+</div>
+<div class="tab-content">
+<div id="tab1" class="tab-pane active">
+{% if cobranza == 1 %}
+{% include 'misc/legal.html.twig' %}
+{% else %}
+<!-- verificamos si el propietarios debe pasar al Dpto. de Cobranza -->
+{% if not cuentas|length > 0 %}
+<tr>
+<td colspan="7">
+<div class="alert alert-danger">
+<strong><i class="ace-icon fa fa-times"></i> Atención: </strong> Estimado(a) {{ session.usuario.nombre }} usted 
+no tiene recibos pendiente por cancelar.
+</div>
+</td>
+</tr>
+{% else %}
+{% set counter = 0 %}
+{% set deuda = 0 %}
+{% set honorarios = 0 %}
+{% set meses = cuentas.inmueble.meses_mora %}
+{% set tasa = cuentas.inmueble.porc_mora %}
+{% set total_usd = 0 %}
+<div class="row">
+{#% if cuentas.propiedad.meses_pendiente > cuentas.inmueble.meses_mora and cuentas.inmueble.meses_mora > 0 %#}
+<!--div class=""-->
+{#% include 'misc/legal.html.twig' %#}
+<!--/div-->
+{#% else %#}
+{% set solvente = solvente + 1 %}
+<div class="col-xs-12 col-sm-12">
+Propietario: <strong>{{cuentas.apto}} {{cuentas.propietario[0].nombre}}</strong><br>
+Email 1: {{cuentas.propietario[0].email}}<br>
+Email 2: {{cuentas.propietario[0].email_alternativo}}<br>
+Habitación: {{cuentas.propietario[0].telefono1}}<br>
+Oficina: {{cuentas.propietario[0].telefono2}}<br>
+Celular: {{cuentas.propietario[0].telefono3}}<br><br>
+<!--Email principal: {{cuentas.propietario[0].email}}<br>
+Email Alternativo: {{cuentas.propietario[0].email_alternativo}}<br><br-->
+<div class="table-responsive">
+<table  class="table table-bordered table-striped">
+<!--div class="alert alert-info">
+<strong>Atención: </strong>
+Marque la(s) factura(s) a cancelar.<br>Recuerde que usted puede modificar el monto del pago en el paso siguiente.
+</div-->
+<thead>
+<tr>
+<!--th style="text-align: center">Pagar</th-->
+<th style="text-align: center">FACTURA</th>
+<th style="text-align: center">PERIODO</th>
+<th style="text-align: center">FACTURADO</th>
+<th style="text-align: center">ABONADO</th>
+<th style="text-align: center">SALDO {{cuentas.inmueble.moneda}}</th>
+{%if cuentas.inmueble.facturacion_usd %}
+<th style="text-align: center">SALDO USD</th>
+{%endif%}
+<th style="text-align: center" class="">ESTATUS</th>
+</tr>
+</thead>
+<tbody>
+<input type="hidden" name="id_inmueble" value="{{cuentas.propiedad.id_inmueble}}" />
+<input type="hidden" name="apto" value="{{cuentas.propiedad.apto}}" />
+{%for factura in cuentas.recibos%}
+    {% set usd = 0 %}
+<tr>
+<!--td style="text-align: center">
+<input type="checkbox" name="id[]" value="{#{counter}#}" {#{ factura.pagado > 0? "disabled=\'disabled\'":"" }#}>
+</td-->
+<td style="text-align: center">
+{{factura.numero_factura}}
+</td>
+<td style="text-align: center">{{factura.periodo | date("m-Y") | upper}}</td>
+<td><span class="pull-right">{{format_number(factura.facturado)}}</span></td>
+<td><span class="pull-right">{{format_number(factura.abonado)}}</span></td>
+<td><span class="pull-right">{{format_number(factura.facturado - factura.abonado)}}</span></td>
+{%if cuentas.inmueble.facturacion_usd%}
+{% set total_usd = total_usd + factura.facturado_usd %}
+<td><span class="pull-right">{{format_number(factura.facturado_usd)}}</span></td>
+{%endif%}
+<td>{% if factura.pagado == 0 %} <span class="label label-sm label-success">Pendiente</span> {% else %}<span class="label label-sm label-warning">Pendiente por procesar</span> {% endif %}</td>
+</tr>
+{% set counter = counter + 1 %}
+{% set deuda = deuda + factura.facturado - factura.abonado %}
+{% endfor %}
+<tr>
+<td colspan="4" style="text-align: right"><strong>Total Deuda:</strong></td>
+<td><span class="pull-right">{{format_number(deuda)}}</span></td>
+<td>
+{%if cuentas.inmueble.facturacion_usd%}
+<span class="pull-right">{{format_number(total_usd)}}</span>
+{%endif%}
+</td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: right"><strong>Total Honorarios:</strong></td>
+<td><span class="pull-right">{{format_number(cuentas.propiedad.deuda_total - deuda)}}</span></td>
+<td>
+{%if cuentas.inmueble.facturacion_usd%}
+<span class="pull-right">{{format_number(cuentas.propiedad.deuda_usd - total_usd)}}</span>
+{%endif%}
+</td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: right"><strong>Total Deuda Honorarios:</strong></td>
+{%  set deuda_hono = deuda + honorarios %}
+<td><span class="pull-right">{{format_number(cuentas.propiedad.deuda_total)}}</span></td>
+<td>
+{%if cuentas.inmueble.facturacion_usd==1 %}
+<span class="pull-right">{{format_number(cuentas.propiedad.deuda_usd)}}</span>
+{%endif%}
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+{#%endif%#}
+</div>
+{% endif %}
+{% endif %}
+</div>
+<div id="tab2" class="tab-pane">
+<a class="btn btn-default btn-lg" id="reportar-pago">Reportar Pago</a>
+<br/>
+<div class="row">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Teléfono Conacto: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-phone fa-lg fa-fw"></i></span>
+<input type="text" id="telefono" name="telefono" placeholder="" class="form-control input-lg" data-mask-placeholder="_" data-mask="(9999)999-9999" value="{{ cuentas.propietario[0].telefono3 }}" maxlength="11">
+</div>
+</div>
+</div>
+<input type="hidden" id="usuario" name="usuario" value="{{session.usuario.nombre}}">
+<div class="col-sm-8">
+<div class="form-group">
+<label id="numero">Persona Contacto:</label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-user fa-lg fa-fw"></i></span>
+<input type="text" id="contacto" name="contacto" placeholder="Nombre persona contacto" class="form-control input-lg" maxlength="50" value="{{cuentas.propietario[0].nombre}}">
+</div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-12">
+<div class="form-group">
+<label>Resultado Gestión: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-edit fa-lg fa-fw"></i></span>
+<textarea class="required form-control" name="resultado" maxlength="240"></textarea>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tab3" class="tab-pane">
+<br>
+<br>
+<h1 class="text-center text-info"><strong><i class="fa fa-spinner fa-spin fa-lg"></i> Espere unos segundos....</strong></h1>
+<h4 class="text-center">Estamos procesando la información</h4>
+<br>
+<br>
+</div>
+<div class="form-actions">
+<div class="row">
+<div class="col-sm-12">
+<ul class="pager wizard no-margin" id="control_wizard">
+<li class="previous disabled">
+<a class="btn btn-lg btn-gray" href="javascript:void(0);"> Anterior </a>
+</li>
+<li class="next">
+<a class="btn btn-lg btn-gray" href="javascript:void(0);"> Siguiente </a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</form>
+{% endif %}
+{% if not accion %}
+<!-- historico de gestiones -->
+<table  class="table table-bordered table-striped" id="tabla_gestion_cobranza">
+<caption style="text-align: left;"><h4>Últimas 10 gestiones de Cobranza registradas 
+        a este propietario</h4></caption>
+<thead>
+<tr>
+<th style="text-align: center">Teléfono</th>
+<th style="text-align: center">Contacto</th>
+<th style="text-align: center" >Resultado</th>
+<th style="text-align: center">Fecha Hora</th>
+<th style="text-align: center">Tipo</th>
+<th style="text-align: center">Usuario</th>
+</tr>
+</thead>
+<tbody>
+{% if gestiones %}
+{% for gestion in gestiones %}
+<tr>
+<td style="text-align: center">{{gestion.telefono}}</td>
+<td>{{gestion.contacto}}</td>
+<td>{{gestion.resultado|raw }}</td>
+<td>{{gestion.fecha_hora|date("d/m/Y \\a \\l\\a\\s h:ia") }}</td>
+<td>{{gestion.tipo}}</td>
+<td>{{gestion.usuario}}</td>
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+<td colspan="6">No existen gestiones de cobro registradas</td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+<!-- fin historico de gestiones -->
+{% endif %}
+</div>
+<!-- main end -->
+</div>
+</div>
+</section>
+
+{% endblock %}
+{% block js %}
+{{parent()}}
+<script type="text/javascript" src="{{ constant('ROOT') }}plugins/jquery.bootstrap.wizard.min.js"></script>
+<script type="text/javascript">
+var pagefunction = function() {
+    $("select[name|='inmueble']").change(function() {
+       var inm = $(this).val();
+       if(inm!="") {
+           var datos = { id_inmueble : $(this).val() };
+           $.post("{{constant('URL_INTRANET')}}/cobranza/listarPropietariosMorososPorInmueble", datos, function(propietarios) {
+               
+                $("select[name|='apto']").empty();
+                $("select[name|='apto']").append('<option value="">Seleccione unidad familiar</option>');
+                $.each(propietarios, function(index, propietario) {
+                    $("select[name|='apto']").append(
+                            "<option value=\"" + propietario.apto + 
+                            "\">" + propietario.apto + 
+                            ' ' + propietario.nombre + 
+                            ' (' + propietario.recibos + ")</option>");
+                });
+            }, 'json');
+       } else {
+           $("select[name|='apto']").empty();
+           $("select[name|='apto']").append('<option value="">Seleccione unidad familiar</option>');
+       }
+    });
+    
+    var $validator = $("#wizard-1").validate({
+
+    rules : {
+        telefono : {
+            required : true,
+            number : true,
+            minlength: 11,
+            maxlength: 11
+        },
+        contacto : {
+            required : true
+        },
+        resultado : {
+            required : true
+        }
+    },
+    messages : {
+        telefono: {
+        required: "Ingrese el número telefónico de contacto",
+        number: 'Debe ingresar solo números',
+        minlength: 'Debe tener por los menos 11 dígitos',
+        maxlength: 'Sobre pasa los 11 dígitos'
+        },
+        contacto : {
+        required: 'Ingrese el nombre de la persona contacto'
+        },
+        resultado : {
+        required: 'Escriba el resultado de la gestión'
+        }
+    },
+    highlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+    },
+    unhighlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+    },
+    errorElement : 'span',
+    errorClass : 'help-block',
+    errorPlacement : function(error, element) {
+        if(element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+            errorSeleccionFactura();
+        } else {
+            if (element.parent('.input-group').length) {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    }   
+    });
+    
+    $('#bootstrap-wizard-1').bootstrapWizard({
+            'onTabShow' : function(tab,navigation,index) {
+                {% if (recibos == 0 or recibos > constant('MESES_COBRANZA')) %}
+                //$("#bootstrap-wizard-1").find(".pager .next").addClass("disabled");
+                {% endif %}
+               /*if (!$(":checkbox").is(":enabled")) {
+                    $("#bootstrap-wizard-1").find(".pager .next").addClass("disabled");
+                }*/
+            },
+            'tabClass' : 'form-wizard',
+            'onTabClick' : function(tab, navigation, index) {
+                return false;
+            },
+            'onNext' : function(tab, navigation, index) {
+                {% if (recibos == 0 or recibos > constant('MESES_COBRANZA'))%}
+                 //return false;
+                {% endif %}
+                /*if (!$(":checkbox").is(":enabled")) {
+                    return false;
+                }*/
+                var $valid = $("#wizard-1").valid();
+                if (!$valid) {
+                    if(index==2) errorPasoN2();
+                    $validator.focusInvalid();
+                    return false;
+                } else {
+                    $('#bootstrap-wizard-1').find('.form-wizard').children('li').eq(index - 1).addClass('complete');
+                    $('#bootstrap-wizard-1').find('.form-wizard').children('li').eq(index - 1).find('.step').html('<i class="fa fa-check"></i>');
+                    if(index==2 ){
+                        $.post("{{ constant('URL_INTRANET')}}/cobranza/guardar", $('#wizard-1').serialize(), function(data) {
+                            
+                        var obj = jQuery.parseJSON(data);
+                            if(obj.suceed) {
+                                $("#tab3").find("h1").addClass("text-success").removeClass("text-info");
+                                $("#tab3").find("h1").html('<strong><i class="fa fa-lg fa-check-circle-o"></i> Muy Bien!</strong>');
+                                $("li.previous").addClass("disabled");
+                            } else {
+                                $("#tab3").find("h1").addClass("text-danger").removeClass("text-info");
+                                $("#tab3").find("h1").html('<strong><i class="fa fa-lg fa-warning"></i >Ups! Error al procesar esta transacción</strong>');
+                            }
+                            $("#tab3").find("h4").html(obj.mensaje);
+                            $("#tabla_gestion_cobranza").hide();
+                            $("#control_wizard").hide();
+                            /*if(obj.envio!='') {
+                                $("#tab3").find("h4").after("Ocurrió un error al tratar de enviarle el correo de confirmación.");
+                            }*/
+                        });
+                    }
+                    if(index==3) {
+                        $("li.next, li.previous").addClass("disabled");
+                    }
+                }
+            }
+    });
+    
+    $("a#reportar-pago").click(function() {
+        $("input[name|='inmueble']").val($("select[name|='inmueble']").val());
+        $("input[name|='apto']").val($("select[name|='apto']").val());
+        $("form#registrar-pago").submit();
+    });
+};
+pagefunction();
+
+</script>
+{% endblock %}

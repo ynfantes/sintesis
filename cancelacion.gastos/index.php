@@ -1,0 +1,2 @@
+<?php
+die("Acceso restringido");

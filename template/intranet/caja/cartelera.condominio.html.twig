@@ -1,0 +1,141 @@
+{# indice #}
+{% extends 'layout/intra.html.twig'%}
+{% block titulo 'Administradora de Condominio'%}
+{% block contenido %}
+<div style="margin-top: 0px;" class="page-intro">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-newspaper-o pr-10"></i>Cartelera Condominio</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section style="padding-bottom: 0" class="main-container">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<div class="main col-md-12">
+<!-- page-title start -->
+<!-- ================ -->
+<div class="separator-2"></div>
+<p class="lead">Bienvenido Sr(a). {{session.usuario.nombre}}</p>
+<!-- page-title end -->
+<!-- blogpost start -->
+<!-- blogpost end -->
+<!-- form start -->
+<ul class="nav nav-pills white bootstrapWizard form-wizard">
+<li data-target="#step1" class="{%if id==-1 %}active{%endif%}">
+<a data-toggle="tab" href="#tab1"> <i class="fa fa-check-edit pr-5"></i> Publicar</a>
+</li>
+<li data-target="#step2" class="{%if id==0 %}active{%endif%}">
+<a href="{{constant('URL_INTRANET')}}/caja/cartelera-condominio/0"><i class="fa fa-list pr-5"></i> Cartelera</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="tab1" class="tab-pane {%if id==-1 %}active{%endif%}">
+<div class="alert alert-danger hidden" id="fallo"></div>
+<div class="alert alert-success hidden" id="exito"></div>
+<form role="form" method="post" action="{{constant('URL_INTRANET')}}/caja/guardar-cartelera" id="publicacion-condominio">
+    <div class="form-group">
+    <input class="form-control" id="titulo" name="titulo" placeholder="Ingrese el título para su publicación" type="text" value="">
+    </div>
+    <div class="form-group">
+        <select class="form-control" name="inmueble" id="inmueble">
+        <option value="">Seleccione un inmueble</option>
+        {% for inmueble in inmuebles %}
+        <option value="{{inmueble.id}}">{{inmueble.nombre_inmueble}}</option>
+        {% endfor %}
+        </select>    
+    </div>
+    <div class="form-group">
+    <div class="input-group col-sm-3">
+    <span class="input-group-addon"><i class="fa fa-calendar-o fa-lg fa-fw"></i></span>
+    <input id="fecha_hasta" name="fecha_hasta" placeholder="Fecha Finalización" class="form-control input-lg date-picker" type="text" data-date-format="dd-mm-yyyy">
+    </div>
+    </div>
+    <div id="summernote"></div>
+    <button type="submit" class="btn btn-default">Guardar Publicación</button>
+</form>
+</div>
+<div id="tab2" class="tab-pane {%if id==0 %}active{%endif%}">
+<table  class="table table-bordered table-striped">
+<!--caption style="text-align: left;"><h4>{#{ cuenta.inmueble.nombre_inmueble }#}</h4></caption-->
+<thead>
+<tr>
+<th style="text-align: center">Inmueble</th>
+<th style="text-align: center">Titulo</th>
+<th style="text-align: center" >Contenido</th>
+<th style="text-align: center">Fecha<small>de Publicación</small></th>
+<th style="text-align: center">Acción</th>
+</tr>
+</thead>
+<tbody>
+{% if publicaciones %}
+{% for publicacion in publicaciones %}
+<tr>
+<td style="text-align: center">{{ publicacion.inmueble }}</td>
+<td>{{ publicacion.titulo }}</td>
+<td>{{ publicacion.contenido|raw }}</td>
+<td>{{ publicacion.fecha|date("d/m/Y \\a \\l\\a\\s h:ia") }}</td>
+<td><a href="{{constant('URL_INTRANET')}}/caja/eliminar-cartelera-condominio/{{publicacion.id}}">Eliminar</a></td>
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+<td colspan="5">No existen publicaciones registradas</td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+</div>
+</div>
+<!-- main end -->
+</div>
+</div>
+</section>
+
+{% endblock %}
+{% block js %}
+{{parent()}}
+<style type="text/css">
+.btn-sm {
+min-width: 50px!Important;
+}
+.dropdown-menu.note-check  > li > a {
+    color:#fff!important;
+}
+.dropdown-menu.note-check  > li > a:hover {
+    color:#ED217C!important;
+}
+</style>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.6/summernote.css" rel="stylesheet">
+<link href="{{constant('ROOT')}}css/datepicker3.min.css" rel="stylesheet">
+<script src="{{constant('ROOT')}}js/summernote.js"></script>
+<script src="{{constant('ROOT')}}js/datepicker.min.js"></script>
+<script type="text/javascript">
+//var markupStr = $('#summernote').summernote('code');
+$(document).ready(function() {
+   $('#summernote').summernote({
+       height: 100,
+       toolbar: [
+        // [groupName, [list of button]]
+        ['fontname', ['fontname']],
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['font', ['strikethrough', 'superscript', 'subscript']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']]
+      ]
+   });
+   $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+});
+</script>
+{% endblock %}

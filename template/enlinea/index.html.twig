@@ -1,0 +1,149 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-home pr-10"></i>Cartelera</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section class="main-container" style="padding-bottom: 0">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<div class="main col-md-12">
+<!-- page-title start -->
+<!-- ================ -->
+<h1 class="page-title">Bienvenido(a) {{session.usuario.nombre}}</h1>
+<div class="separator-2"></div>
+<p class="lead">Ayúdenos a ofrecerle el servicio que usted se merece, mantenga actualizados sus datos de contacto.</p>
+<!-- page-title end -->
+<!-- blogpost start -->
+<!-- blogpost end -->
+<!-- blogpost start -->
+{% set mes = "enero,febrero,marzo,abril,mayo,junio,julio,agosto,sept.,octubre,nov.,dic.s"|split(",") %}
+<!--center><a href="{{constant('URL_SISTEMA')}}/pago" class="btn btn-white btn-lg"><i class="fa fa-credit-card pr-10"></i> Reporte aquí su pago de condominio</a></center-->
+<article data-effect-delay="200" data-animation-effect="fadeInUpSmall" class="clearfix blogpost object-non-visible animated object-visible fadeInUpSmall">
+    <div class="blogpost-body">
+        <div class="post-info">
+            {% set i = fecha_actualizacion[3:2]|number_format %}
+            <span class="day">{{fecha_actualizacion[0:2]}}</span>
+            <span class="month">{{mes[i-1]}} {{fecha_actualizacion[6:4]}}</span>
+        </div>
+        <div class="blogpost-content">
+                <header>
+                    <h2 class="title"><a href="#">Información actualizada el {{fecha_actualizacion}}</a></h2>
+                    <div class="submitted"></div>
+                </header>
+                <p>
+                
+                <a href="{{constant('URL_SISTEMA')}}/pago" class="btn btn-white btn-lg"><i class="fa fa-credit-card pr-10"></i> Reporte aquí su pago de condominio</a></center>
+                    <!--center><a href="{{constant('URL_SISTEMA')}}/pago" class="btn btn-white btn-lg"><i class="fa fa-credit-card pr-10"></i> Reporte aquí su pago de condominio</a></center-->
+                </p>
+        </div>
+    </div>
+    <footer class="clearfix">
+    <ul class="links pull-left">
+    <li><i class="fa fa-clock-o pr-5"></i> Sú última conexión fue el {{ historico[0].inicio|date('d/m/y') }} Duración <strong>{{ historico[0].duracion }} &nbsp;</strong> </li>
+    </ul>
+    </footer>
+</article>
+<!-- cartelera general -->
+{% if cartelera_general %}
+{% for publicacion in cartelera_general %}
+<article data-effect-delay="200" data-animation-effect="fadeInUpSmall" class="clearfix blogpost object-non-visible animated object-visible fadeInUpSmall">
+    <div class="blogpost-body">
+        <div class="post-info">
+            {% set i = publicacion.fecha[6:2]|number_format %}
+            <span class="day">{{publicacion.fecha[8:2]}}</span>
+            <span class="month">{{mes[i-1]}} {{publicacion.fecha[0:4]}}</span>
+        </div>
+        <div class="blogpost-content">
+                <header>
+                    <h2 class="title"><a href="#">{{publicacion.titulo}}</a></h2>
+                    <div class="submitted"></div>
+                </header>
+                {{publicacion.contenido|raw}}
+        </div>
+    </div>
+</article>
+{% endfor %}
+{% endif %}
+{% if cartelera_inmueble %}
+    
+{% for publicacion in cartelera_inmueble %}
+{% for p in publicacion %}
+<article data-effect-delay="200" data-animation-effect="fadeInUpSmall" class="clearfix blogpost object-non-visible animated object-visible fadeInUpSmall">
+    <div class="blogpost-body">
+        <div class="post-info">
+            {% set i = p.fecha[6:2]|number_format %}
+            <span class="day">{{p.fecha[8:2]}}</span>
+            <span class="month">{{mes[i-1]}} {{p.fecha[0:4]}}</span>
+        </div>
+        <div class="blogpost-content">
+            <header>
+                <h2 class="title"><a href="#">{{p.titulo}}</a></h2>
+                <div class="submitted"></div>
+            </header>
+            {{p.contenido|raw}}
+        </div>
+    </div>
+</article>
+{% endfor %}
+{% endfor %}
+{% endif %}
+<!-- blogpost end -->
+<!--center><a href="#" class="btn btn-dark btn-lg"><i class="fa fa-credit-card pr-10"></i> Reporte aquí su pago de condominio</a></center-->
+</div>
+<!-- main end -->
+</div>
+</div>
+</section>
+<section class="main-container" style="padding-top: 0">
+<div class="container">
+<div class="row">
+<div class="main col-md-9">
+<!--
+<div class="stats row grid-space-10">
+<!--div class="col-md-3 col-sm-6">
+<div class="box-style-1 default-bg">
+<h2 class="title">Total a Pagar</h2>
+<i class="fa fa-money"></i>
+<span class="stat-num" data-to="1525" data-speed="3000">0</span>
+</div>
+</div-->
+<!--
+<div class="col-md-3 col-sm-6">
+<div class="box-style-1 default-bg" data-href="{{constant('URL_SISTEMA')}}/cuenta">
+<h2 class="title">Recibos por pagar</h2>
+<i class="fa fa-file"></i>
+<span class="stat-num" data-to="{{recibos}}" data-speed="3000">{{recibos}}</span>
+</div>
+</div>
+<div class="col-md-3 col-sm-6">
+<div class="box-style-1 default-bg">
+<h2 class="title">Mensajes Recibidos</h2>
+<i class="fa fa-comments"></i>
+<span class="stat-num" data-to="{{mensajes}}" data-speed="3000">{{mensajes}}</span>
+</div>
+</div>
+<div class="col-md-3 col-sm-6">
+<div class="box-style-1 default-bg">
+<h2 class="title">Recibos Canelados</h2>
+<i class="fa fa-files-o"></i>
+<span class="stat-num" data-to="{{cancelacion}}" data-speed="3000">{{cancelacion}}</span>
+</div>
+</div>
+</div>
+-->
+</div>
+</div>
+</div>
+</section>
+{% endblock %}
+

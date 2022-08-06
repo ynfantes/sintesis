@@ -1,0 +1,64 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-users pr-10"></i>Soportes de facturacíon</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section class="main-container" style="padding-bottom: 0">
+<div class="container">
+    <div class="row">
+        <h2>{{ condominio[0].inmueble.nombre_inmueble }}</h2>
+        <table  class="table table-bordered table-striped responsive-utilities">
+    <thead>
+        <tr>
+            <th style="text-align: center">Período Facturación</th>
+            <th style="text-align: center">Soportes De</th>
+            <th style="text-align: center">Funciones Especiales</th>
+            <th class="hidden">id</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if prerecibos is empty %}
+            <tr><td colspan="5"><div class="alert alert-error">
+                    <strong>Atención!</strong> No se puede cargar esta información.</div></td></tr>
+        {% else %}
+            {% for detalle in prerecibos.data %}
+                <tr>
+                    <td><center>{{ detalle.periodo | date("m-Y") }}</center></td>
+                    <td>{{ detalle.documento }}</td>
+                    <td>
+                        <div class="btn-toolbar">
+                            <div class="btn-group">
+                                {% if detalle.publicado %}
+                                    <a class="" href="{{constant('URL_SISTEMA')}}/prerecibo/{{ detalle.soporte }}" title="ver soportes"><i class="fa fa-eye"></i></a>
+                                {% else %}
+                                    <a class="disabled" href="javascript:void(0);" data-placement="top" data-toggle="tooltip" title="Soportes no disponibles"><i class="fa fa-eye disabled"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="hidden">{{ detalle.id }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+    </div>
+</div>
+</section>
+{% endblock %}
+{% block js %}
+{{parent()}}
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+{%endblock%}

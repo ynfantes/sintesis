@@ -1,0 +1,123 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-bank pr-10"></i>Estado de Cuenta</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section class="main-container" style="padding-bottom: 0">
+<div class="container">
+{% set n = 0 %}
+{% set total_bs = 0 %}
+{% set total_usd = 0 %}
+{% for cuenta in cuentas %}
+{% set usd = 0 %}
+<div class="row">
+<h2>{{cuenta.inmueble.nombre_inmueble }} - {{ cuenta.propiedades.apto }}</h2>
+<div class="col-sm-4">
+<table  class="table table-bordered table-striped">
+<!--caption style="text-align: left;"><h4>{#{ cuenta.inmueble.nombre_inmueble }#}</h4></caption-->
+<thead>
+<tr>
+<th style="text-align: center">{{cuenta.inmueble.unidad}}</th>
+<th style="text-align: center" class="hidden">DEUDA INMUEBLE</th>
+<th style="text-align: center" class="hidden">FONDE RESERVA</th>
+<th style="text-align: center">DEUDA {{cuenta.inmueble.moneda}}</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center">{{cuenta.propiedades.apto}}</td>
+<td class="hidden"><span class="pull-right">{{format_number(cuenta.inmueble.deuda)}}</span></td>
+<td class="hidden"><span class="pull-right">{{format_number(cuenta.inmueble.fondo_reserva)}}</span></td>
+<td><span class="pull-right">
+{{format_number(cuenta.propiedades.deuda_total)}}
+</span></td>
+</tr>
+</tbody>
+</table>
+<div class="alert alert-success">
+<strong><i class="ace-icon fa fa-bullhorn"></i> Atención: </strong>Desde aquí puede descargar su aviso de cobro haciendo 
+click sobre el número de factura.
+</div>
+</div>
+<div class="col-sm-8">
+{% if cuenta.propiedades.meses_pendiente > cuenta.inmueble.meses_mora and cuenta.inmueble.meses_mora > 0 %}
+<div class="">
+    {% include 'misc/legal.html.twig' %}
+</div>
+{% else %}
+{% if cuenta.cuentas is empty %}
+<div class="alert alert-danger">
+<strong><i class="ace-icon fa fa-times"></i> Atención: </strong> Estimado propietario(a) usted 
+no tiene recibos pendiente de pago.
+</div>
+{% else %}
+    
+<div class="table-responsive">
+<table class="table table-striped table-bordered table-hover">
+<thead class="thin-border-bottom">
+<tr>
+<th style="text-align: center">FACTURA</th>
+<th style="text-align: center">PERIODO</th>
+<th style="text-align: center" class="hidden-phone">FACTURADO</th>
+<th style="text-align: center" class="hidden-phone">ABONADO</th>
+<th style="text-align: center">SALDO {{cuenta.inmueble.moneda}}</th>
+{%if cuenta.inmueble.facturacion_usd==1 %}
+<th style="text-align: center">SALDO USD</th>
+{%endif%}
+<th style="text-align: center" class="hidden-xs">Aviso de Cobro</th>
+</thead>
+<tbody>
+{% for factura in cuenta.cuentas %}
+<tr>
+<td style="text-align: center">
+{% if factura.aviso %}
+<a href="{{ constant('URL_SISTEMA')}}/avisos/ver/{{factura.numero_factura}}" target="_blank">{{factura.numero_factura}}</a>
+{% else %}
+<abbr title="Aviso de Cobro NO DISPONIBLE" class="initialism">{{factura.numero_factura}}</abbr>
+{%endif %}
+</td>
+<td style="text-align: center">{{factura.periodo|date("m-Y")}}</td>
+<td class="hidden-phone"><span class="pull-right">{{format_number(factura.facturado)}}</span></td>
+<td class="hidden-phone"><span class="pull-right">{{format_number(factura.abonado)}}</span></td>
+<td><span class="pull-right">{{format_number(factura.facturado - factura.abonado)}}</span></td>
+{%if cuenta.inmueble.facturacion_usd%}
+{%set usd = factura.facturado_usd%}
+<td><span class="pull-right">{{format_number(usd)}}</span></td>
+{%endif%}
+<td class="hidden-xs">{% if factura.aviso %}
+<a class="label label-success arrowed" href="{{ constant('URL_SISTEMA')}}/avisos/ver/{{ factura.numero_factura}}" target="_blank">Disponible</a>
+{% else %}
+<span class="label label-danger arrowed">No Disponible</span>
+{%endif %}</td>
+</tr>
+{% set total_bs = total_bs + factura.facturado - factura.abonado %}
+{% set total_usd = total_usd + usd %}
+{%endfor%}
+</tbody>
+{%if cuenta.inmueble.facturacion_usd%}
+<tfoot>
+<tr>
+<th colspan="4"><span class="pull-right">Total Deuda</span></th>
+<th><span class="pull-right">{{format_number(total_bs)}}</span></th>
+<th><span class="pull-right">{{format_number(total_usd)}}</span></th>
+</tr>
+<tfoot>
+{%endif%}
+</table>
+</div>
+{% endif %}
+{% endif %}
+</div>
+</div>
+{% endfor %}
+</div>
+</section>
+{% endblock %}

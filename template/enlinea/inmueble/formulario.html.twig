@@ -1,0 +1,60 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-users pr-10"></i>Junta de condominio</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section class="main-container" style="padding-bottom: 0">
+<div class="container">
+    <div class="row">
+        <h2>{{ condominio[0].inmueble.nombre_inmueble }}</h2>
+        <table  class="table table-bordered table-striped responsive-utilities">
+        <thead>
+        <tr>
+        <th style="text-align: center"><i class="fa fa-fw fa-map-marker hidden-md hidden-sm hidden-xs"></i> Und.Fam./Local</th>
+        <th style="text-align: center"><i class="fa fa-fw fa-user hidden-md hidden-sm hidden-xs"></i> Nombre(s) Apellido(s)</th>
+        <th style="text-align: center"><i class="fa fa-fw fa-institution hidden-md hidden-sm hidden-xs"></i> Cargo Junta</th>
+        <th style="text-align: center"><i class="fa fa-fw fa-phone hidden-md hidden-sm hidden-xs"></i> Teléfono Celular</th>
+        <th style="text-align: center"><i class="fa fa-fw fa-envelope hidden-md hidden-sm hidden-xs"></i> Correo Electrónico</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if not condominio is empty %}
+        {% for cond in condominio %}
+        {% if not cond.miembros is empty %}
+        {% set cedula = 0 %}
+        {% for miembro in cond.miembros %}
+        {% if cond.inmueble.id == miembro.id_inmueble %}
+        {% set cedula = miembro.cedula %}
+        <tr>    
+        <td>{{ miembro.apto }}</td>
+        <td>{{ miembro.nombre }}</td>
+        <td>{{ miembro.descripcion }}</td>
+        <td>{{ miembro.telefono1 }}</td>
+        <td>{{ miembro.email }}</td></tr>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <tr>
+        <td colspan="5">&nbsp;</td>
+        </tr>
+        {% endif %}
+        </tbody>
+        </table>
+        {% if cond.miembros is empty %}
+            <div class="alert alert-warning">
+        <strong>Lo sentimos!</strong> Los miembros de la junta de condominio aún no han sido registrados</div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+</section>
+{% endblock %}

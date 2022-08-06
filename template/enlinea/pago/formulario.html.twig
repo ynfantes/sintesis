@@ -1,0 +1,459 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-money pr-10"></i>Registrar pago de condominio</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section class="main-container" style="padding-bottom: 0">
+<div class="container">
+<div class="row">
+<div class="widget-body">
+<div class="row">
+<form novalidate="novalidate" id="wizard-1">
+<div class="col-sm-12" id="bootstrap-wizard-1">
+<div class="form-bootstrapWizard">
+<ul class="nav nav-pills white bootstrapWizard form-wizard">
+<li data-target="#step1" class="active">
+<a data-toggle="tab" href="#tab1"> <i class="fa fa-check-circle pr-5"></i> Selección de facturas</a>
+</li>
+<li data-target="#step2">
+<a data-toggle="tab" href="#tab2"><i class="fa fa-credit-card pr-5"></i> Información del pago</a>
+</li>
+<li data-target="#step3">
+<a data-toggle="tab" href="#tab3"> <i class="fa fa-edit pr-5"></i>Resultado</a>
+</li>
+</ul>
+<div class="clearfix"></div>
+</div>
+<div class="tab-content">
+<div id="tab1" class="tab-pane active">
+<div id="falta-factura" role="alert" class="alert alert-danger hidden"><strong>Ups!</strong> Debe seleccionar por lo menos una factura a cancelar.</div>
+<h3><strong>Paso 1 </strong> - Selección de facturas a cancelar</h3>
+{% if cobranza == 1 %}
+{% include 'misc/legal.html.twig' %}
+{% else %}
+<!-- verificamos si el propietarios debe pasar al Dpto. de Cobranza -->
+{% if not cuentas|length > 0 %}
+    <tr>
+        <td colspan="7">
+            <div class="alert alert-danger">
+<strong><i class="ace-icon fa fa-times"></i> Atención: </strong> Estimado(a) {{session.usuario.nombre}} usted 
+no tiene recibos pendiente por cancelar.
+</div>
+        </td>
+    </tr>
+{% else %}
+{% set counter = 0 %}
+{% set solvente = 0 %}
+{% for cuenta in cuentas %}
+<div class="row">
+{% if cuenta.propiedades.meses_pendiente > cuenta.inmueble.meses_mora and cuenta.inmueble.meses_mora > 0 %}
+<div class="">
+{% include 'misc/legal.html.twig' %}
+</div>
+{% else %}
+{% set solvente = solvente + 1 %}
+<div class="col-xs-12 col-sm-12">
+<div class="table-responsive">
+<table  class="table table-bordered table-striped">
+<caption style="text-align: left;"><h5>{{cuenta.inmueble.nombre_inmueble}} - {{cuenta.propiedades.apto}}<br>
+</h5>
+<div class="alert alert-info">
+<strong>Atención: </strong>
+Marque la(s) factura(s) a cancelar.<br>Recuerde que usted puede modificar el monto de su pago en el paso siguiente.
+</div>
+</caption>
+<thead>
+<tr>
+<th style="text-align: center">PAGAR</th>
+<th style="text-align: center">FACTURA</th>
+<th style="text-align: center">PERIODO</th>
+<th style="text-align: center">FACTURADO</th>
+<th style="text-align: center">ABONADO</th>
+<th style="text-align: center">SALDO {{cuenta.inmueble.moneda}}</th>
+{%if cuenta.inmueble.facturacion_usd%}
+<th style="text-align: center">SALDO USD</th>
+{%endif%}
+<th style="text-align: center" class="">ESTATUS</th>
+</tr>
+</thead>
+<tbody>
+{% set total_usd = 0 %}
+{% for factura in cuenta.cuentas %}
+<tr>
+<td style="text-align: center">
+<input type="checkbox" name="id[]" value="{{counter}}" {{factura.pagado > 0? "disabled=\'disabled\'":"" }}>
+</td>
+<td style="text-align: center">
+<input type="hidden" name="id_inmueble[]" value="{{factura.id_inmueble}}" />
+<input type="hidden" name="id_apto[]" value="{{factura.apto}}" />
+<input type="hidden" name="periodo[]" value="{{factura.periodo}}" />
+<input type="hidden" name="facturas[]" value="{{factura.numero_factura}}" />
+{% if factura.aviso %}
+<a href="{{ constant('URL_SISTEMA')}}/avisos/ver/{{factura.numero_factura}}" target="_blank">{{factura.numero_factura}}</a>
+{% else %}
+<abbr title="Aviso de Cobro NO DISPONIBLE" class="initialism">{{ factura.numero_factura}}</abbr>
+{%endif %}
+</td>
+<td style="text-align: center">{{factura.periodo|date("m-Y")}}</td>
+<td><span class="pull-right">{{format_number(factura.facturado)}}</span></td>
+<td><span class="pull-right">{{format_number(factura.abonado)}}</span></td>
+<td><span class="pull-right">
+<input type="hidden" name="montos[]" value="{{factura.facturado - factura.abonado}}" />
+{{format_number(factura.facturado - factura.abonado) }}
+</span>
+</td>
+{%if cuenta.inmueble.facturacion_usd%}
+{% set usd = factura.facturado_usd %}
+<td><span class="pull-right">{{format_number(usd)}}</span></td>
+{%endif%}
+<td>{% if factura.pagado == 0 %} <span class="label label-sm label-success">Pendiente</span> {% else %}<span class="label label-sm label-warning">Pendiente por procesar</span> {% endif %}</td>
+</tr>
+{% set counter = counter + 1 %}
+{% set total_usd = total_usd + usd %}
+{% endfor %}
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><span class="pull-right">{{format_number(cuenta.propiedades.deuda_total) }}<span class="pull-right"></td>
+<td>
+    <span class="pull-right">{{format_number(total_usd)}}</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+{%endif%}
+</div>
+{% endfor %}
+{% endif %}
+{% endif %}
+</div>
+<div id="tab2" class="tab-pane">
+<br>
+<h3><strong>Paso 2</strong> - Información del depósito o transferencia</h3>
+<div class="alert alert-info">
+<strong>Atención: </strong>
+Aquí usted puede modificar el monto de su pago.
+</div>
+<div class="row">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Forma de pago:</label> 
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-credit-card fa-lg fa-fw"></i></span>
+<select class="form-control input-lg" name="tipo_pago">
+<option selected value="D">Depósito</option>
+<option value="T">Transferencia</option>
+</select>
+</div>
+</div>
+</div>
+<input type="hidden" id="estatus" name="estatus" value="P" class="">
+<input type="hidden" id="enviado" name="enviado" value="0" class="">
+<div class="col-sm-4">
+<div class="form-group">
+<label id="numero">Número de referencia:</label>
+<div class="input-group">
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-asterisk fa-lg fa-fw"></i></span>
+<input type="text" id="numero_documento" name="numero_documento" placeholder="Referencia" class="form-control input-lg" maxlength="14">
+</div>
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Número de cuenta destino: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-pencil-square-o fa-lg fa-fw"></i></i></span>
+<input type="text" id="numero_cuenta" name="numero_cuenta" placeholder="Número de cuenta" class="form-control input-lg" value="{{ cuentas[0].inmueble.numero_cuenta }}">
+</div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Fecha depósito o transferencia: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-calendar-o fa-lg fa-fw"></i></span>
+<input type="text" id="fecha_documento" name="fecha_documento" placeholder="" class="form-control input-lg"  data-mask-placeholder="_" data-mask="99/99/9999">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Banco origen de la transferencia: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-pencil-square-o fa-lg fa-fw"></i></i></span>
+<input type="text" id="banco_origen" name="banco_origen" placeholder="Banco origen"  class="form-control input-lg" disabled="disabled">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Banco destino: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-pencil-square-o fa-lg fa-fw"></i></span>
+<input type="text" id="banco_destino" name="banco_destino" placeholder="" class="form-control input-lg" value="{{ cuentas[0].inmueble.banco }}">
+</div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Monto: </label>
+<div class="input-group">
+<span class="input-group-addon"><strong style="font-size:1.6em">Bs.</strong></span>
+<input type="text" id="monto" name="monto" placeholder="0,00" class="form-control input-lg">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Correo electrónico: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-envelope-o fa-lg fa-fw"></i></i></span>
+<input type="text" id="email" name="email" placeholder="Correo electrónico"  class="form-control input-lg" value="{{ usuario.email }}">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Teléfono Conacto: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-mobile-phone fa-lg fa-fw"></i></span>
+<input type="text" id="telefono" name="telefono" placeholder="" class="form-control input-lg" data-mask-placeholder="_" data-mask="(9999)999-9999" value="{{ usuario.telefono3 }}">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tab3" class="tab-pane">
+<br>
+<h3><strong>Paso 3</strong> - Finalizar</h3>
+<br>
+<h1 class="text-center text-info"><strong><i class="fa fa-spinner fa-spin fa-lg"></i> Espere unos segundos....</strong></h1>
+<h4 class="text-center">Estamos procesando la información</h4>
+<br>
+<br>
+</div>
+<div class="form-actions">
+<div class="row">
+<div class="col-sm-12">
+<ul class="pager wizard no-margin">
+<li class="previous disabled">
+<a class="btn btn-lg btn-gray" href="javascript:void(0);"> Anterior </a>
+</li>
+<li class="next">
+<a class="btn btn-lg btn-gray" href="javascript:void(0);"> Siguiente </a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</form>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+{% endblock %}
+{% block js %}
+{{parent()}}
+<script src="{{ constant('ROOT') }}js/jquery.maskedinput.min.js"></script>
+<script type="text/javascript" src="{{ constant('ROOT') }}plugins/jquery.bootstrap.wizard.min.js"></script>
+<script type="text/javascript">
+var pagefunction = function() {
+
+    //loadScript("{#{constant('ROOT')}#}js/plugin/bootstrap-wizard/jquery.bootstrap.wizard.min.js", runBootstrapWizard);
+    $(":checkbox").click(function() {
+        var monto = 0;
+        $("input:checked").each(function() {
+            var  monto_factura = $("input[name|='montos[]']").eq($(this).val()).val();
+            monto = parseFloat(monto) + parseFloat(monto_factura);
+            //monto = parseFloat(monto) + (parseFloat($(this).closest("tr").find("td:eq(5)").text().replace(".", "").replace(",", ".")) * 100);
+        });
+        //monto = monto / 100;
+        if(monto>0) {
+            $("#falta-factura").addClass("hidden");
+        }
+        $("#monto").val(monto.formatCurrency());
+    });
+    $("#monto").blur(function(){
+        var monto = 0;
+        var s_monto = '';
+        s_monto = $("#monto").val();
+        s_monto = s_monto.replaceAll('.','');
+        s_monto = s_monto.replace(',','.');
+        monto = parseFloat(s_monto);
+        $("#monto").val(monto.formatCurrency());
+    });
+    $("select[name|='tipo_pago']").change(function() {
+
+        if ($(this).val() == "T") {
+            $("#banco_origen").attr('disabled', false);
+            $('#numero').html("Código Transferencia:");
+        } else {
+            $("#banco_origen").attr('disabled', true);
+            $("#banco_origen").val('');
+            $('#numero').html("Número Depósito:");
+        }
+    });
+    
+    var $validator = $("#wizard-1").validate({
+
+    rules : {
+        email : {
+            required : true,
+            email : "Ingrese una email válido."
+        },
+        'id[]' : {
+            required : true
+        },
+        numero_documento : {
+            required : true
+        },
+        numero_cuenta : {
+            required : true
+        },
+        fecha_documento : {
+            required : true
+        },
+        banco_destino : {
+            required : true,
+            minlength : 4
+        },
+        monto : {
+            required:true,
+            number:true,
+            min: 0.01
+        },
+        telefono : {
+            required:true
+        },
+        banco_origen : {
+            required: function() {
+                return $("select[name|='tipo_pago']").val() == 'T';
+            }
+        }
+    },
+    messages : {
+        email: {
+        required: "Ingrese su dirección de correo electrónico",
+        email: "Ingrese un email válido"
+        },
+        monto : {
+        required: "Debe ingresar el monto",
+        number: "Debe introducir una cantidad válida",
+        min: "El monto debe ser mayor que 1"
+        },
+        telefono : {
+        required: 'Ingrese un número de teléfono de contacto'
+        },
+        banco_origen : {
+        required: 'Ingrese el nombre del banco desde donde hizo la transferencia'
+        },
+        numero_documento : "Ingrese un número de referencia",
+        numero_cuenta: "Ingrese el número de cuenta",
+        fecha_documento: "Ingrese la fecha del depósito o transferencia",
+        banco_destino: "Ingrese el nombre del banco donde hizo el " + $('tipo_documento').val() + ".",
+        "id[]": "Debe seleccionar por lo menos una factura para continuar"
+    },
+    highlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+    },
+    unhighlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+    },
+    errorElement : 'span',
+    errorClass : 'help-block',
+    errorPlacement : function(error, element) {
+        if(element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+            errorSeleccionFactura();
+        } else {
+            if (element.parent('.input-group').length) {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    }   
+    });
+    
+    function errorSeleccionFactura() {
+        $("#falta-factura").removeClass("hidden");
+    }
+    $('#bootstrap-wizard-1').bootstrapWizard({
+            'onTabShow' : function(tab,navigation,index) {
+                {% if (recibos == 0 or recibos > constant('MESES_COBRANZA')) %}
+                //$("#bootstrap-wizard-1").find(".pager .next").addClass("disabled");
+                {% endif %}
+                if (!$(":checkbox").is(":enabled")) {
+                    $("#bootstrap-wizard-1").find(".pager .next").addClass("disabled");
+                }
+            },
+            'tabClass' : 'form-wizard',
+            'onTabClick' : function(tab, navigation, index) {
+                return false;
+            },
+            'onNext' : function(tab, navigation, index) {
+                {% if (recibos == 0 or recibos > constant('MESES_COBRANZA'))%}
+                 //return false;
+                {% endif %}
+                if (!$(":checkbox").is(":enabled")) {
+                    return false;
+                }
+                var $valid = $("#wizard-1").valid();
+                if (!$valid) {
+                    if(index==2) errorPasoN2();
+                    $validator.focusInvalid();
+                    return false;
+                } else {
+                    $('#bootstrap-wizard-1').find('.form-wizard').children('li').eq(index - 1).addClass('complete');
+                    $('#bootstrap-wizard-1').find('.form-wizard').children('li').eq(index - 1).find('.step').html('<i class="fa fa-check"></i>');
+                    if(index==2 ){
+                        $.post("{{ constant('URL_SISTEMA')}}/pago/guardar", $('#wizard-1').serialize(), function(data) {
+                        var obj = jQuery.parseJSON(data);
+                            if(obj.suceed) {
+                                $("#tab3").find("h1").addClass("text-success").removeClass("text-info");    
+                                $("#tab3").find("h1").html('<strong><i class="fa fa-lg fa-check-circle-o"></i> Muy Bien!</strong>');
+                                $("li.previous").addClass("disabled");
+                            } else {
+                                $("#tab3").find("h1").addClass("text-danger").removeClass("text-info");
+                                $("#tab3").find("h1").html('<strong><i class="fa fa-lg fa-warning"></i >Ups! Error al procesar esta transacción</strong>');
+                            }
+                            $("#tab3").find("h4").html(obj.mensaje);
+                        });
+                    }
+                    if(index==3) {
+                        $("li.next, li.previous").addClass("disabled");
+                    }
+                }
+            }
+    });
+    
+    function errorPasoN2() {
+
+    }
+};
+pagefunction();
+
+</script>
+{% endblock %}

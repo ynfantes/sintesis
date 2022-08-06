@@ -1,0 +1,156 @@
+{# indice #}
+{% extends 'layout/intra.html.twig'%}
+{% block titulo 'Administradora de Condominio'%}
+{% block contenido %}
+<div style="margin-top: 0px;" class="page-intro">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-newspaper-o pr-10"></i>Gestión de usuarios</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section style="padding-bottom: 0" class="main-container">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<div class="main col-md-12">
+<!-- page-title start -->
+<!-- ================ -->
+<div class="separator-2"></div>
+<p class="lead">Bienvenido Sr(a). {{session.usuario.nombre}}</p>
+<!-- page-title end -->
+<!-- blogpost start -->
+<!-- blogpost end -->
+<!-- form start -->
+<div class="tab-content">
+{%if resultado%}
+{% include 'misc/resultado.html.twig' %}
+{% endif %}
+<form novalidate="novalidate" id="form-usuario" method="post" action="{{constant('URL_INTRANET')}}/usuarios/guardar">
+<div class="row">
+<div class="col-sm-4">
+<div class="form-group">
+<label>Nombre: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-user fa-lg fa-fw"></i></span>
+<input type="text" id="nombre" name="nombre" placeholder="" class="form-control input-lg" value="{{usuario.nombre}}">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group">
+<label>Contraseña: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-pencil-square-o fa-lg fa-fw"></i></span>
+<input type="text" id="clave" name="clave" placeholder="Contaseña" class="form-control input-lg" value="{{usuario.clave}}">
+</div>
+</div>
+</div>
+</div>
+<div class="row">
+{%if accion=='editar' %}
+<input type="hidden" id="id" name="id" value="{{usuario.id}}" class="">
+{%endif%}
+<div class="col-sm-4">
+<div class="form-group">
+<label>Correo electrónico: </label>
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-pencil-square-o fa-lg fa-fw"></i></span>
+<input type="text" id="email" name="email" class="form-control input-lg" value="{{usuario.email}}">
+</div>
+</div>
+</div>
+<div class="col-sm-4">
+<div class="form-group has-success">
+<label>Perfíl:</label> 
+<div class="input-group">
+<span class="input-group-addon"><i class="fa fa-credit-card fa-lg fa-fw"></i></span>
+<select class="form-control input-lg" name="directorio">
+<option value="">---SELECCIONE--</option>
+<option value="caja" {% if usuario.directorio=='caja' %}selected{%endif%}>CAJA</option>
+<option value="cobranza" {% if usuario.directorio=='cobranza' %}selected{%endif%}>COBRANZA</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<br>
+<input type="submit" class="submit-button btn btn-default" value="Guardar">
+</form>
+</div>
+<!-- main end -->
+</div>
+</div>
+</div>
+</section>
+{% endblock %}
+{% block js %}
+{{parent()}}
+<script type="text/javascript" src="{{ constant('ROOT')}}js/jquery-validate/jquery.validate.js"></script>
+<script type="text/javascript" src="{{ constant('ROOT')}}js/jquery-validate/localization/messages_es.js"></script>
+<script type="text/javascript">
+var pagefunction = function() {
+$("#form-usuario").validate({
+
+    rules : {
+        email : {
+            required : true,
+            email : "Ingrese una email válido."
+        },
+        nombre : {
+            required : true,
+            minlength: 4
+        },
+        clave : {
+            required : true,
+            minlength: 4
+        },
+        directorio : {
+            required : true
+        }
+    },
+    messages : {
+        email: {
+        required: "Ingrese su dirección de correo electrónico",
+        email: "Ingrese un email válido"
+        },
+        nombre : {
+        required: "Nombre no puede estar vacío",
+        minlength: "Ingrese mínimo 4 caracteres"
+        },
+        clave : {
+        required: 'Contraseña no puede estar vacía',
+        minlength: 'Ingrese mínimo 4 caracteres'
+        },
+        directorio : "Debe seleccionar un perfíl de la lista"
+    },
+    highlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+    },
+    unhighlight : function(element) {
+        $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+    },
+    errorElement : 'span',
+    errorClass : 'help-block',
+    errorPlacement : function(error, element) {
+        if(element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+            errorSeleccionFactura();
+        } else {
+            if (element.parent('.input-group').length) {
+                error.insertAfter(element.parent());
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    }   
+    });    
+};
+pagefunction();
+</script>
+{% endblock %}
+

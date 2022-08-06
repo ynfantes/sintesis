@@ -1,0 +1,71 @@
+{# indice #}
+{% extends 'layout/intra.html.twig'%}
+{% block titulo 'Administradora de Condominio'%}
+{% block contenido %}
+<div style="margin-top: 0px;" class="page-intro">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-newspaper-o pr-10"></i>Cartelera General</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section style="padding-bottom: 0" class="main-container">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<div class="main col-md-12">
+<!-- page-title start -->
+<!-- ================ -->
+<div class="separator-2"></div>
+<p class="lead">Bienvenido Sr(a). {{session.usuario.nombre}}</p>
+<!-- page-title end -->
+<!-- blogpost start -->
+<!-- blogpost end -->
+<!-- form start -->
+<div class="tab-content">
+<table  class="table table-bordered table-striped">
+<!--caption style="text-align: left;"><h4>{#{ cuenta.inmueble.nombre_inmueble }#}</h4></caption-->
+<thead>
+<tr>
+<th style="text-align: center">Nombre</th>
+<th style="text-align: center" >Cedula</th>
+<th style="text-align: center">Contraseña</th>
+<th style="text-align: center">Email</th>
+<th style="text-align: center">Perfil</th>
+<th style="text-align: center">Acción</th>
+</tr>
+</thead>
+<tbody>
+{% if usuarios %}
+{% for usuario in usuarios %}
+<tr>
+<td>{{usuario.nombre}}</td>
+<td>{{usuario.cedula}}</td>
+<td>{{usuario.clave}}</td>
+<td>{{usuario.email}}</td>
+<td>{{usuario.directorio}}</td>
+<td><a href="{{constant('URL_INTRANET')}}/usuarios/editar/{{usuario.id}}">Editar</a></td>
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+<td colspan="4">No existen usuarios registrados</td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+</div>
+<!-- main end -->
+</div>
+</div>
+</section>
+{% endblock %}
+{% block js %}
+{{parent()}}
+{% endblock %}
+

@@ -1,0 +1,201 @@
+{% extends 'layout/enlinea.html.twig'%}
+{% block contenido %}
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-users pr-10"></i>Datos de contacto</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="page-intro" style="margin-top: 0px;">
+<div class="container">
+<div id="content" class="row">
+<div id="hr1" class="tab-pane">
+{%if resultado%}
+{% include 'misc/resultado.html.twig' %}
+{% endif %}
+{% if id != 'clave' %}
+<div class="alert alert-warning"><strong>Estimado propietario,</strong> es importante para nosotros que mantenga actualizada su información de contacto. Ayudenos a mantenerlo informado en todo momento de la situación de su inmueble.</div>
+<div class="widget-body">
+<form class="form-horizontal" name="perfil" novalidate="novalidate">
+<fieldset>
+<legend class="txt-color-blue"><strong>General</strong></legend>
+<input type="hidden" name="id" value="{{ propietario.id }}"/>
+<input type="hidden" name="modificado" value="1"/>
+<div class="form-group">
+<label class="col-md-2 control-label">Nombre Razón Social</label>
+<div class="col-md-10">
+<input type="text" value="{{ propietario.nombre }}" class="form-control" disabled="disabled">
+</div>
+</div>
+<input type="hidden" list="list" class="form-control" value="{{ propietario.cedula }}">
+</fieldset>
+<fieldset>
+<legend class="txt-color-blue"><strong>Contacto</strong></legend>
+<div class="form-group">
+<label class="col-md-2 control-label" for="telefono1">Teléfono Habitación</label>
+<div class="col-md-4"><div class="input-group">
+        <input type="text" id="telefono1" name="telefono1" value="{{ propietario.telefono1 }}" class="form-control" data-mask-placeholder="_" data-mask="(9999) 999-9999">
+<span class="input-group-addon"><i class="fa fa-phone"></i></span>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="col-md-2 control-label" for="telefono2">Teléfono Oficina</label>
+<div class="col-md-4"><div class="input-group">
+<input type="text" id="telefono2" name="telefono2" value="{{ propietario.telefono2 }}" class="form-control" data-mask-placeholder="_" data-mask="(9999) 999-9999">
+<span class="input-group-addon"><i class="fa fa-phone"></i></span>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="col-md-2 control-label" for="telefono2">Teléfono Celular</label>
+<div class="col-md-4"><div class="input-group">
+<input type="text" id="telefono3" name="telefono3" value="{{ propietario.telefono3 }}" class="alphanumeric form-control"  data-mask-placeholder="_" data-mask="(9999) 999-9999">
+<span class="input-group-addon"><i class="fa fa-phone"></i></span>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="col-md-2 control-label" for="email">Correo electrónico</label>
+<div class="col-md-4"><div class="input-group">
+<input type="text" id="email" name="email" value="{{ propietario.email }}" class="required email form-control">
+<span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="col-md-2 control-label" for="email">Correo electrónico Alternativo</label>
+<div class="col-md-4"><div class="input-group">
+<input type="text" id="email_alternativo" name="email_alternativo" value="{{ propietario.email_alternativo }}" class="required email form-control">
+<span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="col-md-2 control-label" for="direccion">Dirección</label>
+<div class="col-md-10">
+<textarea class="required form-control" name="direccion">{{ propietario.direccion}}</textarea>
+</div>
+</div>
+
+</fieldset>
+<div class="form-actions">
+<div class="row">
+<div class="col-md-12">
+<button class="btn btn-default" name="actualizar">
+Guardar <i class="fa fa-save"></i>
+</button>
+</div>
+</div>
+</div>
+</form>
+
+</div>
+{% else %}
+<h4 class="alert alert-warning"> Mantenga en resguardo su clave de acceso. </h4>
+<div class="widget-body">
+<div class="form-block center-block">
+<h3 class="title">Actualizar Contraseña</h3>
+<hr>
+<p class="help-block">Complete la siguiente información.</p>
+<form class="form-horizontal" name="clave" novalidate="novalidate">
+<input type="hidden" name="id" value="{{propietario.id}}"/>
+<input type="hidden" name="cambio_clave" value="1"/>
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label">Actual: </label>
+<div class="col-sm-8">
+    <input type="password" value="" class="form-control" name="clave_actual" maxlength="7">
+<i class="fa fa-key form-control-feedback"></i>
+</div>
+</div>
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label">Nueva: </label>
+<div class="col-sm-8">
+    <input type="password" list="list" class="form-control" value="" name="clave" maxlength="7">
+<i class="fa fa-key form-control-feedback"></i>
+</div>
+</div>
+<div class="form-group">
+<div class="col-sm-offset-3 col-sm-8">
+<button class="btn btn-default" name="cambiar">
+Actualizar <i class="fa fa-save"></i>
+</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+{% block js %}
+{{ parent() }}
+ <script type="text/javascript">
+var pagefunction = function() {
+};
+// end pagefunction
+// run pagefunction on load
+pagefunction();
+$(function() {
+$(document).on("click","button[name|='actualizar']",function() {
+var url = "{{ constant('URL_SISTEMA') }}/propietario/modificar/perfil";
+var data = $("form[name|='perfil']").serialize();
+enviarFormulario(data, url);
+return false; // Evitar ejecutar el submit del formulario.
+});
+});
+
+$(function() {
+$(document).on("click","button[name|='cambiar']",function() {
+var url = "{{ constant('URL_SISTEMA') }}/propietario/modificar/clave";
+var data = $("form[name|='clave']").serialize();
+if (!$("form[name|='clave']").valid()) {
+return false;
+} else {
+enviarFormulario(data, url);
+}
+return false; // Evitar ejecutar el submit del formulario.
+});
+});
+
+$(function() {
+// Validation
+$("form[name|='clave']").validate({
+// Rules for form validation
+rules: {
+clave_actual: {
+    required: true
+},
+clave: {
+    required: true,
+    minlength: 4,
+    maxlength: 20
+}
+},
+// Messages for form validation
+messages: {
+clave_actual: {
+    required: 'Ingrese su clave actual'
+},
+clave: {
+    required: 'Ingrese su NUEVA clave de acceso',
+    minlength: 'La nueva clave debe ser mínimo de 4 caracteres',
+    maxlength: 'La nueva clave no debe ser mayor de 20 caracteres'
+}
+},
+// Do not change code below
+errorPlacement: function(error, element) {
+error.insertAfter(element.parent());
+}
+});
+});
+ </script>
+{% endblock %}

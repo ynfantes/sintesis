@@ -1,0 +1,55 @@
+{# indice #}
+{% extends 'layout/intra.html.twig'%}
+{% block titulo 'Administradora de Condominio'%}
+{% block contenido %}
+<div style="margin-top: 0px;" class="page-intro">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<ol class="breadcrumb">
+<li><i class="fa fa-newspaper-o pr-10"></i>Cartelera General</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<section style="padding-bottom: 0" class="main-container">
+<div class="container">
+<div class="row">
+<!-- main start -->
+<!-- ================ -->
+<table  class="table table-bordered table-striped">
+<!--caption style="text-align: left;"><h4>{#{ cuenta.inmueble.nombre_inmueble }#}</h4></caption-->
+<thead>
+<tr>
+<th style="text-align: center">Titulo</th>
+<th style="text-align: center" >Contenido</th>
+<th style="text-align: center">Fecha<small>de Publicación</small></th>
+<th style="text-align: center">Acción</th>
+</tr>
+</thead>
+<tbody>
+{% if publicaciones %}
+{% for publicacion in publicaciones %}
+<tr>
+<td>{{ publicacion.titulo }}</td>
+<td>{{ publicacion.contenido|raw }}</td>
+<td>{{ publicacion.fecha }}</td>
+<td>Eliminar</td>
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+<td colspan="4">No existen publicaciones registradas</td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+<!-- main end -->
+</div>
+</div>
+</section>
+{% endblock %}
+{% block js %}
+{{parent()}}
+{% endblock %}
