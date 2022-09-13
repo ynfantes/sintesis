@@ -8,5 +8,6 @@ $r = $mail->enviar_email("Prueba", "Este es un mensaje de prueba", '', "ynfantes
 if ($r=='') {
    echo ".- Mensaje enviado a Ok!\n";
 } else {
+   echo $r;
    echo ".- Mensaje enviado a Falló\n";
 }
