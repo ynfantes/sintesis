@@ -52,6 +52,7 @@ class mailto {
                 $this->mail->SMTPAuth = true;
                 $this->mail->Username = $this->user;
                 $this->mail->Password = $this->pass;
+                $this->mail->From = $usuario;
 //                echo "Usuario: ".  $this->user."<br>";
 //                echo "Pass: ".  $this->pass."<br>";
 //                echo "Port: ". $this->port."<br>";
