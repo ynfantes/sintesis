@@ -63,7 +63,7 @@ class mailto {
           default:
               $this->mail->IsMail();
         }
-        $this->mail->SMTPDebug = false; 
+        $this->mail->SMTPDebug = true; 
         $this->mail->SMTPKeepAlive = true;
     }
     /**
