@@ -190,6 +190,7 @@ class pago extends db implements crud {
                                 $resultado['envio'] = '';
                             }
                         }
+                        
                     }
                 } else {
                     $resultado = $resultado['pago'];
