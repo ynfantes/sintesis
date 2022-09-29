@@ -164,7 +164,7 @@ switch ($accion) {
     case "listaPagosMaestros":
         $pagos = new pago();
         $pagos_maestro = $pagos->listarPagosPendientes();
-
+        var_dump($pagos_maestro);
         if ($pagos_maestro['suceed'] && count($pagos_maestro['data']) > 0) {
             echo "id,fecha,tipo_pago,numero_documento,fecha_documento,monto,banco_origen,";
             echo "banco_destino,numero_cuenta,estatus,email,enviado,telefono<br>";
