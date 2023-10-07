@@ -1,0 +1,43 @@
+# This is a basic workflow that is manually triggered
+
+name: Publish Website sintesisonline.com.ve
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches:
+      - master
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  FTP-Deploy-Action:
+    name: FTP-Sintesisonline
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔨 Get latest code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: ✔ Use Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: 🚀 Deploy Sintesisonline
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.vscode*
+            **/cancelacion/*.pdf
+            **/enlinea/avisos/*.pdf
+            **/includes/constanst.php
+            **/data/*.*
+            constanst.php
+            .htaccess
