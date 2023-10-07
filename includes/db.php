@@ -51,7 +51,7 @@ Class db {
             $this->mysqli->query("SET NAMES 'utf8'");
             
         } catch (Exception $exc) {
-            echo $this->mysqli->connect_errno . " " . $this->mysqli->connect - error;
+            echo $this->mysqli->connect_errno . " " . $this->mysqli->connect_error;
             echo $exc->getTraceAsString();
             exit("No se pudo conectar con la Base de Datos. Consulte al administrador del sistema.");
         }
@@ -97,7 +97,6 @@ Class db {
             $r['data'] = $exc->getTraceAsString();
             $r['row'] = isset($data[0]) ? $data[0] : array();
         }
-        $this->log("select", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -122,7 +121,6 @@ Class db {
             $r['stats']['error'] = $this->mysqli->error;
             $r['data'] = $exc->getTraceAsString();
         }
-        $this->log("exec", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -219,7 +217,6 @@ Class db {
             $r['stats']['error'] = $this->mysqli->error;
             $r['data'] = $exc->getTraceAsString();
         }
-        $this->log("select", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -274,7 +271,6 @@ Class db {
             $r['stats']['error'] = $this->mysqli->error;
             $r['data'] = $exc->getTraceAsString();
         }
-        $this->log("insert", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -333,7 +329,6 @@ Class db {
             $r['suceed'] = false;
             $r['data'] = $exc->getTraceAsString();
         }
-        $this->log("update", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -384,7 +379,6 @@ Class db {
             $r['stats']['error'] = $this->mysqli->error;
             $r['data'] = $exc->getTraceAsString();
         }
-        $this->log("delete", $r['suceed'], $r['query'], isset($r['stats']['error']) ? $r['stats']['error'] : "");
         return $r;
     }
 
@@ -399,13 +393,6 @@ Class db {
     public static function query($consulta) {
         $a = new db();
         return $a->dame_query($consulta);
-    }
-
-    public function log($tipo, $status, $query, $error) {
-        $consulta = "
-            insert into log_db(tipo,status,query,error) values(
-            '$tipo',$status,'$query','$error')";
-        $this->mysqli->query($consulta);
     }
 
 }
@@ -556,7 +543,7 @@ Class Misc {
      * @param Boolean $output_entities indica si reemplaza los caracteres especiales por entidades html
      * @return <type>
      */
-    public static function trim_text($input, $length, $ellipses = true, $strip_html = true, $output_entities = false) {
+    public static function trim_text($input, $length=0, $ellipses = true, $strip_html = true, $output_entities = false) {
         // Strip tags, if desired
         if ($strip_html) {
             $input = strip_tags($input);
