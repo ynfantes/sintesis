@@ -37,6 +37,7 @@ jobs:
             **/.vscode*
             **/cancelacion/*.pdf
             **/enlinea/avisos/*.pdf
+            **/enlinea/prerecibo/*.pdf
             **/includes/constanst.php
             **/data/*.*
             constanst.php
